@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Message Feed - Zero Trust App</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .user-info img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+      }
+
+      .user-details h2 {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-details p {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .logout-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .logout-btn:hover {
+        background-color: #c82333;
+      }
+
+      .login-prompt {
+        text-align: center;
+        padding: 40px;
+      }
+
+      .login-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+      }
+
+      .login-btn:hover {
+        background-color: #0056b3;
+      }
+
+      .message-form {
+        margin-bottom: 30px;
+      }
+
+      .message-form h3 {
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+
+      .form-group input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      .submit-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .submit-btn:hover {
+        background-color: #218838;
+      }
+
+      .submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      .feed {
+        margin-top: 30px;
+      }
+
+      .feed h3 {
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .message-item {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      }
+
+      .message-text {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .message-meta {
+        font-size: 12px;
+        color: #666;
+        display: flex;
+        gap: 15px;
+      }
+
+      .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+
+      .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div sec:authorize="!isAuthenticated()" class="login-prompt">
+        <h2>Welcome to Message Feed</h2>
+        <p>Please login to access the message feed</p>
+        <a th:href="@{/oauth2/authorization/okta}" class="login-btn"
+          >Login with Auth0</a
+        >
+      </div>
+
+      <div sec:authorize="isAuthenticated()">
+        <div class="header">
+          <div class="user-info">
+            <img
+              th:src="${profile.get('picture')}"
+              th:alt="${profile.get('name')}"
+            />
+            <div class="user-details">
+              <h2 th:text="${profile.get('name')}">User</h2>
+              <p th:text="${profile.get('email')}">email@example.com</p>
+            </div>
+          </div>
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">Log Out</button>
+          </form>
+        </div>
+
+        <div class="message-form">
+          <h3>Post a Message</h3>
+          <div id="error-container"></div>
+          <div id="success-container"></div>
+          <form id="message-form">
+            <div class="form-group">
+              <label for="message-input">Message:</label>
+              <input
+                type="text"
+                id="message-input"
+                name="message"
+                placeholder="Enter your message..."
+                required
+              />
+            </div>
+            <button type="submit" class="submit-btn" id="submit-btn">
+              Send Message
+            </button>
+          </form>
+        </div>
+
+        <div class="feed">
+          <h3>Message Feed (Last 10 Messages)</h3>
+          <div id="messages-container">
+            <p>Loading messages...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "/api/messages";
+
+      function showError(message) {
+        const container = document.getElementById("error-container");
+        container.innerHTML = `<div class="error-message">${message}</div>`;
+        setTimeout(() => {
+          container.innerHTML = "";
+        }, 5000);
+      }
+
+      function showSuccess(message) {
+        const container = document.getElementById("success-container");
+        container.innerHTML = `<div class="success-message">${message}</div>`;
+        setTimeout(() => {
+          container.innerHTML = "";
+        }, 3000);
+      }
+
+      async function loadMessages() {
+        try {
+          const response = await fetch(API_BASE, {
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to load messages");
+          }
+
+          const messages = await response.json();
+          displayMessages(messages);
+        } catch (error) {
+          console.error("Error loading messages:", error);
+          document.getElementById("messages-container").innerHTML =
+            '<p style="color: red;">Error loading messages. Please refresh the page.</p>';
+        }
+      }
+
+      function displayMessages(messages) {
+        const container = document.getElementById("messages-container");
+
+        if (messages.length === 0) {
+          container.innerHTML = "<p>No messages yet. Be the first to post!</p>";
+          return;
+        }
+
+        const messagesHtml = messages
+          .map((msg) => {
+            const date = new Date(msg.timestamp);
+            const formattedDate = date.toLocaleString();
+            return `
+                    <div class="message-item">
+                        <div class="message-text">${escapeHtml(
+                          msg.message
+                        )}</div>
+                        <div class="message-meta">
+                            <span>IP: ${escapeHtml(msg.clientIp)}</span>
+                            <span>Time: ${formattedDate}</span>
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+
+        container.innerHTML = messagesHtml;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      document
+        .getElementById("message-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const input = document.getElementById("message-input");
+          const submitBtn = document.getElementById("submit-btn");
+          const message = input.value.trim();
+
+          if (!message) {
+            showError("Please enter a message");
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending...";
+
+          try {
+            const response = await fetch(API_BASE, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({ message: message }),
+            });
+
+            if (!response.ok) {
+              if (response.status === 401) {
+                throw new Error("Unauthorized. Please login again.");
+              }
+              throw new Error("Failed to send message");
+            }
+
+            const newMessage = await response.json();
+            showSuccess("Message sent successfully!");
+            input.value = "";
+            await loadMessages();
+          } catch (error) {
+            console.error("Error sending message:", error);
+            showError(
+              error.message || "Failed to send message. Please try again."
+            );
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Message";
+          }
+        });
+
+      // Load messages on page load
+      if (document.getElementById("messages-container")) {
+        loadMessages();
+        // Refresh messages every 5 seconds
+        setInterval(loadMessages, 5000);
+      }
+    </script>
+  </body>
+</html>
