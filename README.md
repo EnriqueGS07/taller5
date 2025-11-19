@@ -345,15 +345,5 @@ Obtener los últimos 10 mensajes.
 
 ---
 
-## Solución de Problemas
-
-### Puerto Ya en Uso
-
-Cambia el puerto en `application.yml`:
-
-```yaml
-server:
-  port: 8080
-```
 
 
