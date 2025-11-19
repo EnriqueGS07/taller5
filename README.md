@@ -12,6 +12,10 @@ Esta aplicación demuestra un sistema de feed de mensajes mínimo en Spring Boot
 - **Autorización**: Validación de tokens JWT en cada solicitud
 - **Almacenamiento de Datos**: HashMap en memoria para persistencia de mensajes
 
+### Demo
+
+https://github.com/user-attachments/assets/a12b7079-364b-402e-af83-b612ff94c4e8
+
 ### Características
 
 - Autenticación de usuarios mediante Auth0
@@ -344,6 +348,11 @@ Obtener los últimos 10 mensajes.
 - **Cumplimiento**: Cumple con estándares modernos de seguridad para protección de API
 
 ---
+
+
+
+
+
 
 
 
