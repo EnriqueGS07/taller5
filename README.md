@@ -356,18 +356,4 @@ server:
   port: 8080
 ```
 
-### URI de Redirección Inválida
 
-Asegúrate de que la URL de callback de Auth0 coincida exactamente:
-
-```
-http://localhost:3000/login/oauth2/code/okta
-```
-
-### 401 No Autorizado
-
-- Limpia las cookies del navegador
-- Vuelve a iniciar sesión a través de Auth0
-- Verifica que el token JWT se esté enviando con las solicitudes
-
----
